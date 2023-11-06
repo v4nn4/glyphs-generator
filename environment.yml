@@ -1,0 +1,12 @@
+name: glyphs-generator-env
+dependencies:
+  - python=3.11
+  - pip
+  - ipykernel
+  - numpy
+  - matplotlib
+  - pytorch
+  - pip:
+    - black
+    - isort
+    - nbqa
