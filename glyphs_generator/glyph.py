@@ -1,78 +1,132 @@
-from functools import reduce
+from dataclasses import dataclass
+from typing import Dict, List, Tuple, Callable
 
 import matplotlib.pyplot as plt
 import numpy as np
-import torch
 
 
-class GlyphGenerator:
-    def __init__(self, strokes: np.ndarray):
-        self._N = len(strokes[0])
-        self._S = len(strokes)
-        self._strokes = strokes
+@dataclass
+class Coordinate:
+    x: float
+    y: float
 
-    @staticmethod
-    def _is_equal(glyph_1: np.ndarray, glyph_2: np.ndarray) -> bool:
+    def rot90(self) -> "Coordinate":
+        angle = np.pi / 2  # 90 degrees in radians
+        rotation_matrix = np.array(
+            [[np.cos(angle), -np.sin(angle)], [np.sin(angle), np.cos(angle)]]
+        )
+        rotated_point = np.dot(rotation_matrix, np.array([self.x, self.y]))
+        return Coordinate(x=rotated_point[0], y=rotated_point[1])
+
+    def flip_left(self) -> "Coordinate":
+        return Coordinate(x=self.x, y=-self.y)
+
+    def flip_up(self) -> "Coordinate":
+        return Coordinate(x=-self.x, y=self.y)
+
+
+@dataclass
+class Stroke:
+    start: Coordinate
+    end: Coordinate
+
+    def __repr__(self) -> str:
+        return f"({self.start.x}, {self.start.y})-({self.end.x}, {self.end.y})"
+
+
+@dataclass
+class Glyph:
+    strokes: List[Stroke]
+
+    def _apply_coordinate_transformation(
+        self, transformation: Callable[[Coordinate], Coordinate]
+    ) -> "Glyph":
+        rotated_strokes = []
+        for stroke in self.strokes:
+            start = transformation(stroke.start)
+            end = transformation(stroke.end)
+            rotated_stroke = Stroke(start=start, end=end)
+            rotated_strokes.append(rotated_stroke)
+        return Glyph(strokes=rotated_strokes)
+
+    def rot90(self) -> "Glyph":
+        return self._apply_coordinate_transformation(lambda x: x.rot90())
+
+    def flip_left(self) -> "Glyph":
+        return self._apply_coordinate_transformation(lambda x: x.flip_left())
+
+    def flip_up(self) -> "Glyph":
+        return self._apply_coordinate_transformation(lambda x: x.flip_up())
+
+    def __eq__(self, other: "Glyph") -> bool:
+        return np.abs(self.rasterize(5) - other.rasterize(5)).sum() == 0
+
+    def rasterize(self, dimension: int) -> np.ndarray:
+        array = np.zeros(shape=(dimension, dimension))
+
+        def world_to_view(coordinate: Coordinate) -> Tuple[int, int]:
+            return int(
+                np.round(coordinate.x * (dimension - 1) / 2 + (dimension - 1) / 2)
+            ), int(np.round(coordinate.y * (dimension - 1) / 2 + (dimension - 1) / 2))
+
+        for stroke in self.strokes:
+            x0, y0 = world_to_view(stroke.start)
+            x1, y1 = world_to_view(stroke.end)
+            array[x0, y0] = 1
+            array[x1, y1] = 1
+            if x0 == x1:
+                for y in range(min(y0, y1), min(max(y0, y1) + 1, dimension)):
+                    array[x0, y] = 1
+            elif y0 == y1:
+                for x in range(min(x0, x1), min(max(x0, x1) + 1, dimension)):
+                    array[x, y0] = 1
+            else:
+                raise Exception("Slope is not implemented")
+        return array
+
+    def intersect(self, stroke: Stroke) -> bool:
         return (
-            np.array_equal(glyph_1, glyph_2)
-            or np.array_equal(glyph_1.T, glyph_2)
-            or np.array_equal(np.fliplr(glyph_1), glyph_2)
-            or np.array_equal(np.flipud(glyph_1), glyph_2)
-            or np.array_equal(np.fliplr(glyph_1.T), glyph_2)
-            or np.array_equal(np.flipud(glyph_1.T), glyph_2)
-            or np.array_equal(np.fliplr(glyph_1).T, glyph_2)
-            or np.array_equal(np.flipud(glyph_1).T, glyph_2)
+            np.multiply(self.rasterize(5), Glyph(strokes=[stroke]).rasterize(5)).sum()
+            != 0
         )
 
-    @staticmethod
-    def _is_eligible(glyph: np.ndarray) -> bool:
-        N = len(glyph)
-        max = torch.max(
-            torch.nn.AdaptiveAvgPool2d(N - 1)(
-                torch.tensor(glyph, dtype=torch.float32).view(1, 1, N, N)
+    def plot(self) -> plt.Figure:
+        import matplotlib.pyplot as plt
+        import matplotlib.lines as lines
+
+        fig = plt.figure(figsize=(3, 3))
+        for stroke in self.strokes:
+            fig.add_artist(
+                lines.Line2D(
+                    [(1 + stroke.start.x) / 2, (1 + stroke.end.x) / 2],
+                    [(1 + stroke.start.y) / 2, (1 + stroke.end.y) / 2],
+                    linewidth=50,
+                    color="black",
+                )
             )
-        ).item()
-        return max
+        return fig
 
-    def generate(self):
-        strokes = self._strokes
-        glyphs = {i: [] for i in np.arange(0, len(strokes))}
-        glyphs[0].append(strokes[0])  # assuming glyphs are all same up to rotation
-        # for stroke in strokes:
-        #    if all(not is_equal(stroke, chosen_stroke) for chosen_stroke in stored_glyphs[0]):
-        #        stored_glyphs[0].append(stroke)
-        for order in np.arange(0, len(glyphs)):
-            for chosen_stroke in glyphs[order]:
-                for stroke in strokes:
-                    all_glyphs = reduce(list.__add__, glyphs.values())
-                    if np.multiply(chosen_stroke, stroke).sum() == 0:
-                        continue
-                    glyph = np.clip(chosen_stroke + stroke, 0, 255)
-                    if self._is_eligible(glyph):
-                        if all(
-                            [
-                                not self._is_equal(glyph, stored_glyph)
-                                for stored_glyph in all_glyphs
-                            ]
-                        ):
-                            glyphs[order + 1].append(glyph)
-        return glyphs
 
-    def plot(self):
-        glyphs = self.generate()
-        N = self._N
-        S = self._S
-        max_glypgs_per_order = np.max([len(glyphs) for _, glyphs in glyphs.items()])
-        canvas = np.zeros(shape=((N + 1) * S + 1, (N + 1) * max_glypgs_per_order + 1))
+@dataclass
+class Alphabet:
+    glyphs: Dict[int, List[Glyph]]
 
-        for order, glyphs in glyphs.items():
-            i = 0
-            for glyph in glyphs:
-                canvas[
-                    1 + (N + 1) * order : 1 + (N + 1) * (order + 1) - 1,
-                    1 + (N + 1) * i : 1 + (N + 1) * (i + 1) - 1,
-                ] = glyph
-                i += 1
-        plt.imshow(255 - np.array(canvas) * 255, cmap="gray")
-        plt.axis("off")
-        plt.tight_layout()
+    def rasterize(self, dimension: int = 5, margin: int = 1) -> np.ndarray:
+        largest_number_of_glyphs_per_order = np.max(
+            np.array([len(glyphs) for glyphs in self.glyphs.values()])
+        )
+        strokes = self.glyphs[len(self.glyphs) - 1][0].strokes
+        tensor = np.zeros(
+            shape=(
+                (dimension + margin) * len(strokes),
+                (dimension + margin) * largest_number_of_glyphs_per_order,
+            )
+        )
+        for order, glyphs in self.glyphs.items():
+            for i, glyph in enumerate(glyphs):
+                tensor[
+                    (dimension + margin) * order : (dimension + margin) * order
+                    + dimension,
+                    (dimension + margin) * i : (dimension + margin) * i + dimension,
+                ] = glyph.rasterize(dimension)
+        return tensor
