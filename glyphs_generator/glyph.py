@@ -73,19 +73,19 @@ class Glyph:
         for stroke in self.strokes:
             x0, y0 = world_to_view(stroke.start)
             x1, y1 = world_to_view(stroke.end)
-            array[x0, y0] = 1
-            array[x1, y1] = 1
+            array[y0, x0] = 1
+            array[y1, x1] = 1
             if x0 == x1:
                 for y in range(min(y0, y1), min(max(y0, y1) + 1, glyph_size)):
-                    array[x0, y] = 1
+                    array[y, x0] = 1
             elif y0 == y1:
                 for x in range(min(x0, x1), min(max(x0, x1) + 1, glyph_size)):
-                    array[x, y0] = 1
+                    array[y0, x] = 1
             else:
-                slope = (y1 - y0) / (x1 - x0)
-                for x in range(min(x0, x1), min(max(x0, x1) + 1, glyph_size)):
-                    y = int(np.floor(slope * (x - x0) + y0))
-                    array[x, y] = 1
+                slope = (x1 - x0) / (y1 - y0)
+                for y in range(min(y0, y1), min(max(y0, y1) + 1, glyph_size)):
+                    x = int(np.floor(slope * (y - y0) + x0))
+                    array[y, x] = 1
         return array
 
     def intersect(self, stroke: Stroke) -> bool:
