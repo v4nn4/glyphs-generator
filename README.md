@@ -26,3 +26,7 @@ We generated alphabets based on some glyph primitives with 6 strokes or 8 stroke
 ### 8-A
 
 ![primitives_8-A](assets/glyphs_8a.png)
+
+### 10-A
+
+![primitives_8-A](assets/glyphs_10a.png)
