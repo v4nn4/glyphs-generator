@@ -39,7 +39,7 @@ impl GlyphGenerator {
             if let Some(glyphs) = alphabet.get(&order).cloned() {
                 for glyph in glyphs {
                     for stroke in &strokes {
-                        if !glyph.intersect(stroke, 7) {
+                        if !glyph.intersect(stroke, 9) {
                             continue;
                         }
 

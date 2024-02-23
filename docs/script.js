@@ -66,8 +66,7 @@ let createSquare = (id, width, margin) => {
         line.id = `line-${state.lines.length + 1}`;
       }
       state.selection.selectedAnchorPoint = null;
-      console.log(state.selection.selectedPaths);
-    } else {
+      compute();
     }
   };
   return div;
@@ -104,30 +103,11 @@ let render = () => {
     let square = createSquare(id, squareWidth, margin);
     canvas.appendChild(square);
   }
-  let button = document.createElement("button");
-  button.textContent = "Generate";
-  button.onclick = () => {
-    let input = [];
-    state.selection.selectedPaths.forEach((path) => {
-      input.push({ start: path[0], end: path[1] });
-    });
-    let result = JSON.parse(run(JSON.stringify(input)));
-    let resultDiv = document.getElementById("result");
-    resultDiv.innerHTML = "";
-    resultDiv.style.display = "flex";
-    for (let [_, glyphs] of Object.entries(result.glyphs)) {
-      glyphs.forEach((glyph) => {
-        let glyphSvg = generateGlyphSvg(glyph.strokes);
-        resultDiv.appendChild(glyphSvg);
-      });
-    }
-  };
   let resultDiv = document.createElement("div");
   resultDiv.id = "result";
   resultDiv.style.display = "flex";
   resultDiv.style.flexWrap = "wrap";
   resultDiv.style.margin = `${margin}px`;
-  document.body.appendChild(button);
   let mainContainer = document.createElement("div");
   mainContainer.style.display = "flex";
   let canvasContainer = document.createElement("div");
@@ -155,6 +135,25 @@ let generateGlyphSvg = (strokes) => {
     svg.appendChild(line);
   });
   return svg;
+};
+
+let compute = () => {
+  let input = { strokes: [], pixel_dimension: 9 };
+  state.selection.selectedPaths.forEach((path) => {
+    input.strokes.push({ start: path[0], end: path[1] });
+  });
+  console.log(JSON.stringify(input));
+  let result = JSON.parse(run(JSON.stringify(input)));
+  console.log(result);
+  let resultDiv = document.getElementById("result");
+  resultDiv.innerHTML = "";
+  resultDiv.style.display = "flex";
+  for (let [_, glyphs] of Object.entries(result.glyphs)) {
+    glyphs.forEach((glyph) => {
+      let glyphSvg = generateGlyphSvg(glyph.strokes);
+      resultDiv.appendChild(glyphSvg);
+    });
+  }
 };
 
 async function loadWasm() {

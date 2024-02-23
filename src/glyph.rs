@@ -1,6 +1,4 @@
-use ndarray::arr2;
 use serde::{Deserialize, Serialize};
-use std::f64::consts::PI;
 
 #[derive(Serialize, Deserialize, Debug, Clone, Copy)]
 pub struct Coordinate {
@@ -14,11 +12,7 @@ impl Coordinate {
     }
 
     pub fn rot90(&self) -> Self {
-        let angle = PI / 2.0; // 90 degrees in radians
-        let rotation_matrix = arr2(&[[angle.cos(), -angle.sin()], [angle.sin(), angle.cos()]]);
-        let point = arr2(&[[self.x], [self.y]]);
-        let rotated_point = rotation_matrix.dot(&point);
-        Coordinate::new(rotated_point[[0, 0]], rotated_point[[1, 0]])
+        Coordinate::new(-self.y, self.x)
     }
 
     pub fn flip_left(&self) -> Self {
@@ -151,7 +145,7 @@ impl Glyph {
 
 impl PartialEq for Glyph {
     fn eq(&self, other: &Self) -> bool {
-        let size = 7; // Fixed size for rasterization as per the Python example
+        let size = 9; // Fixed size for rasterization as per the Python example
         let self_raster = self.rasterize(size);
         let other_raster = other.rasterize(size);
 
@@ -177,7 +171,4 @@ impl Alphabet {
     pub fn new(glyphs: std::collections::HashMap<usize, Vec<Glyph>>) -> Self {
         Self { glyphs }
     }
-
-    // Placeholder for the rasterize function
-    // Details omitted for brevity
 }
