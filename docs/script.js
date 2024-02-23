@@ -32,7 +32,7 @@ let createSquare = (id, width, margin) => {
   div.style.width = `${width}px`;
   div.style.height = div.style.width;
   div.style.margin = `${margin}px`;
-  div.onmousedown = (event) => {
+  div.onpointerdown = (event) => {
     event.preventDefault();
     state.selection.selectedAnchorPoint = id;
     let line = document.createElementNS("http://www.w3.org/2000/svg", "line");
@@ -48,7 +48,7 @@ let createSquare = (id, width, margin) => {
     let svg = document.getElementById("svg");
     svg.appendChild(line);
   };
-  div.onmouseup = (event) => {
+  div.onpointerup = (event) => {
     if (
       state.selection.selectedAnchorPoint !== null &&
       state.selection.selectedAnchorPoint !== id
@@ -72,7 +72,7 @@ let createSquare = (id, width, margin) => {
   return div;
 };
 
-document.addEventListener("mousemove", (event) => {
+document.addEventListener("pointermove", (event) => {
   if (state.selection.selectedAnchorPoint == null) return;
   let line = document.getElementById("currentLine");
   if (line) {
@@ -81,7 +81,7 @@ document.addEventListener("mousemove", (event) => {
   }
 });
 
-document.addEventListener("mouseup", (event) => {
+document.addEventListener("pointerup", (event) => {
   if (state.selection.selectedAnchorPoint == null) return;
   let line = document.getElementById("currentLine");
   if (line) {
