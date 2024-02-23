@@ -1,0 +1,14 @@
+{
+  "name": "glyphs-generator",
+  "version": "0.1.0",
+  "files": [
+    "glyphs_generator_bg.wasm",
+    "glyphs_generator.js",
+    "glyphs_generator.d.ts"
+  ],
+  "module": "glyphs_generator.js",
+  "types": "glyphs_generator.d.ts",
+  "sideEffects": [
+    "./snippets/*"
+  ]
+}
