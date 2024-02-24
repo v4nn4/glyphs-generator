@@ -98,6 +98,9 @@ let render = () => {
   const margin = 50;
   canvas.style.width = `${(squareWidth + 2 * margin) * 3}px`;
   canvas.style.flexWrap = "wrap";
+  canvas.onpointermove = (event) => event.defaultPrevented();
+  canvas.onpointerdown = (event) => event.defaultPrevented();
+  canvas.onpointerup = (event) => event.defaultPrevented();
   for (let i = 0; i < n; ++i) {
     const id = `square-${i}`;
     let square = createSquare(id, squareWidth, margin);
@@ -108,16 +111,14 @@ let render = () => {
   resultDiv.style.display = "flex";
   resultDiv.style.flexWrap = "wrap";
   resultDiv.style.margin = `${margin}px`;
-  let mainContainer = document.createElement("div");
-  mainContainer.style.display = "flex";
+  let mainContainer = document.getElementById("content");
   let canvasContainer = document.createElement("div");
   canvasContainer.appendChild(canvas);
   mainContainer.appendChild(canvasContainer);
   mainContainer.appendChild(resultDiv);
-  document.body.appendChild(mainContainer);
 };
 
-let generateGlyphSvg = (strokes) => {
+let generateGlyphSvg = (strokes, color) => {
   let svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
   svg.setAttribute("viewBox", "-3 -3 63 63");
   svg.style.width = "60px";
@@ -130,7 +131,7 @@ let generateGlyphSvg = (strokes) => {
     line.setAttribute("y1", 40 * (0.5 + stroke.start.y));
     line.setAttribute("x2", 40 * (0.5 + stroke.end.x));
     line.setAttribute("y2", 40 * (0.5 + stroke.end.y));
-    line.setAttribute("stroke", "black");
+    line.setAttribute("stroke", color);
     line.setAttribute("stroke-width", 3);
     svg.appendChild(line);
   });
@@ -148,9 +149,10 @@ let compute = () => {
   let resultDiv = document.getElementById("result");
   resultDiv.innerHTML = "";
   resultDiv.style.display = "flex";
-  for (let [_, glyphs] of Object.entries(result.glyphs)) {
+  for (let [index, glyphs] of Object.entries(result.glyphs)) {
     glyphs.forEach((glyph) => {
-      let glyphSvg = generateGlyphSvg(glyph.strokes);
+      let color = "black"; // palette[index % palette.length];
+      let glyphSvg = generateGlyphSvg(glyph.strokes, color);
       resultDiv.appendChild(glyphSvg);
     });
   }
