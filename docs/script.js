@@ -98,9 +98,9 @@ let render = () => {
   const margin = 50;
   canvas.style.width = `${(squareWidth + 2 * margin) * 3}px`;
   canvas.style.flexWrap = "wrap";
-  canvas.onpointermove = (event) => event.defaultPrevented();
-  canvas.onpointerdown = (event) => event.defaultPrevented();
-  canvas.onpointerup = (event) => event.defaultPrevented();
+  canvas.onpointermove = (event) => event.preventDefault();
+  canvas.onpointerdown = (event) => event.preventDefault();
+  canvas.onpointerup = (event) => event.preventDefault();
   for (let i = 0; i < n; ++i) {
     const id = `square-${i}`;
     let square = createSquare(id, squareWidth, margin);
@@ -145,7 +145,7 @@ let compute = () => {
   });
   console.log(JSON.stringify(input));
   let result = JSON.parse(run(JSON.stringify(input)));
-  console.log(result);
+  console.log(result.report);
   let resultDiv = document.getElementById("result");
   resultDiv.innerHTML = "";
   resultDiv.style.display = "flex";
