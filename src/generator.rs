@@ -31,7 +31,7 @@ impl GlyphGenerator {
         result
             .get_mut(&0)
             .unwrap()
-            .push(Glyph::new(&vec![strokes[0].clone()]));
+            .push(Glyph::new(&vec![strokes[0].clone()], dimension));
         let mut report: Vec<u8> = vec![0, 0, 0];
         for order in 0..strokes.len() {
             if order == strokes.len() - 1 {
@@ -50,7 +50,7 @@ impl GlyphGenerator {
 
                         let mut new_strokes = glyph.strokes.clone();
                         new_strokes.push(stroke.clone());
-                        let next_glyph = Glyph::new(&new_strokes);
+                        let next_glyph = Glyph::new(&new_strokes, dimension);
 
                         if observed.contains(&next_glyph) {
                             report[2] += 1;

@@ -106,15 +106,24 @@ let render = () => {
     let square = createSquare(id, squareWidth, margin);
     canvas.appendChild(square);
   }
+  let mainContainer = document.getElementById("content");
+  let canvasContainer = document.createElement("div");
+  canvasContainer.appendChild(canvas);
+  let configurationPanel = document.createElement("div");
+  let dimensionInput = document.createElement("input");
+  dimensionInput.type = "number";
+  dimensionInput.id = "dimensionInput";
+  dimensionInput.onchange = () => {
+    compute();
+  };
+  configurationPanel.appendChild(dimensionInput);
+  canvasContainer.appendChild(configurationPanel);
+  mainContainer.appendChild(canvasContainer);
   let resultDiv = document.createElement("div");
   resultDiv.id = "result";
   resultDiv.style.display = "flex";
   resultDiv.style.flexWrap = "wrap";
   resultDiv.style.margin = `${margin}px`;
-  let mainContainer = document.getElementById("content");
-  let canvasContainer = document.createElement("div");
-  canvasContainer.appendChild(canvas);
-  mainContainer.appendChild(canvasContainer);
   mainContainer.appendChild(resultDiv);
 };
 
@@ -139,7 +148,10 @@ let generateGlyphSvg = (strokes, color) => {
 };
 
 let compute = () => {
-  let input = { strokes: [], pixel_dimension: 9 };
+  let pixel_dimension = parseFloat(
+    document.getElementById("dimensionInput").value
+  );
+  let input = { strokes: [], pixel_dimension: pixel_dimension };
   state.selection.selectedPaths.forEach((path) => {
     input.strokes.push({ start: path[0], end: path[1] });
   });

@@ -1,2 +1,3 @@
-from .glyph import Coordinate, Stroke, Glyph, Alphabet
 from .generator import GlyphGenerator
+from .data import Point, Stroke
+from .builder import build_generator

@@ -7,13 +7,15 @@ use serde::{Deserialize, Serialize};
 pub struct Glyph {
     pub strokes: Vec<Stroke>,
     raster: Vec<Vec<u8>>,
+    dimension: usize,
 }
 
 impl Glyph {
-    pub fn new(strokes: &Vec<Stroke>) -> Self {
+    pub fn new(strokes: &Vec<Stroke>, dimension: usize) -> Self {
         Self {
             strokes: strokes.to_vec(),
-            raster: rasterize(strokes, 9),
+            raster: rasterize(strokes, dimension),
+            dimension: dimension,
         }
     }
 
@@ -31,7 +33,7 @@ impl Glyph {
             })
             .collect();
 
-        Self::new(&rotated_strokes)
+        Self::new(&rotated_strokes, self.dimension)
     }
 
     pub fn rot90(&self) -> Self {

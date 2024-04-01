@@ -1,8 +1,7 @@
 use crate::Coordinate;
 use crate::Stroke;
 
-pub fn world_to_view(coordinate: &Coordinate) -> (usize, usize) {
-    let dimension = 9;
+pub fn world_to_view(coordinate: &Coordinate, dimension: usize) -> (usize, usize) {
     let half = (dimension as f64 - 1.0) / 2.0;
     (
         ((coordinate.x * half + half).round() as usize).min(dimension - 1),
@@ -20,8 +19,8 @@ pub fn rasterize(strokes: &Vec<Stroke>, dimension: usize) -> Vec<Vec<u8>> {
 }
 
 pub fn rasterize_stroke(stroke: &Stroke, dimension: usize, array: &mut Vec<Vec<u8>>) {
-    let (x0, y0) = world_to_view(&stroke.start);
-    let (x1, y1) = world_to_view(&stroke.end);
+    let (x0, y0) = world_to_view(&stroke.start, dimension);
+    let (x1, y1) = world_to_view(&stroke.end, dimension);
     array[y0][x0] = 1;
     array[y1][x1] = 1;
 

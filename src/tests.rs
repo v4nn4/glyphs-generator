@@ -1,7 +1,9 @@
+use crate::run;
 use crate::Coordinate;
 use crate::Glyph;
 use crate::GlyphGenerator;
 use crate::Stroke;
+use std::fs;
 
 #[test]
 fn test_are_glyphs_equal() {
@@ -19,8 +21,8 @@ fn test_are_glyphs_equal() {
         Stroke::new(Coordinate::new(-1.0, 1.0), Coordinate::new(1.0, 1.0)),
     ];
 
-    let glyph1 = Glyph::new(&strokes1);
-    let glyph2 = Glyph::new(&strokes2);
+    let glyph1 = Glyph::new(&strokes1, 9);
+    let glyph2 = Glyph::new(&strokes2, 9);
     assert!(glyph1 != glyph2);
 
     let glyph3 = glyph1.flip_up();
@@ -32,7 +34,7 @@ fn test_glyph_intersects_with_stroke() {
     // T-shape
     let stroke1 = Stroke::new(Coordinate::new(-1.0, -1.0), Coordinate::new(-1.0, 1.0));
     let stroke2 = Stroke::new(Coordinate::new(0.0, 0.0), Coordinate::new(-1.0, 0.0));
-    let glyph = Glyph::new(&vec![stroke1, stroke2]);
+    let glyph = Glyph::new(&vec![stroke1, stroke2], 9);
     let stroke = Stroke::new(Coordinate::new(1.0, -1.0), Coordinate::new(1.0, 1.0));
     glyph.intersect(&stroke, 9);
 }
@@ -59,4 +61,15 @@ fn generate_creates_correct_number_of_glyphs() {
             key, expected_length, vec_length
         );
     }
+}
+
+#[test]
+fn test_11_strokes() {
+    let file_content = fs::read_to_string(
+        "/Users/romflorentz/Documents/Repos/glyphs-generator/examples/strokes_11.json",
+    )
+    .expect("Failed to read file")
+    .to_string();
+    let output = run(file_content);
+    println!("{}", output);
 }
