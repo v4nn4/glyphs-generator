@@ -1,6 +1,7 @@
-from typing import List, Dict
 from functools import reduce
-from .data import Stroke, Glyph, InternalStroke, InternalGlyph
+from typing import Dict, List
+
+from .data import Glyph, InternalGlyph, InternalStroke, Stroke
 
 
 class GlyphGenerator:
@@ -26,17 +27,14 @@ class GlyphGenerator:
         for i in indices:
             intersection_found = False
             for j in indices:
-                if i != j and self.intersection_matrix[i][j]:
+                if i != j and self.intersection_matrix[i][j] == 1:
                     intersection_found = True
             if not intersection_found:
                 return False
         return True
 
     def transform(self, glyph: InternalGlyph) -> List[InternalGlyph]:
-        result = [
-            InternalGlyph(strokes=[], identifier=0)
-            for _ in range(self.nb_transformations)
-        ]
+        result = [InternalGlyph(strokes=[], identifier=0) for _ in range(self.nb_transformations)]
         for i in range(self.nb_transformations):
             for stroke in glyph.strokes:
                 stroke_index = self.transformation_table[stroke.index][i]
@@ -77,10 +75,6 @@ class GlyphGenerator:
                     next_glyph = self.add(glyph, stroke)
                     if self.are_strokes_intersecting(next_glyph):
                         transformed_glyphs = self.transform(next_glyph)
-                        if next_glyph not in last_glyphs and all(
-                            [g not in glyphs[i + 1] for g in transformed_glyphs]
-                        ):
+                        if next_glyph not in last_glyphs and all([g not in glyphs[i + 1] for g in transformed_glyphs]):
                             glyphs[i + 1].append(next_glyph)
-        return list(
-            map(lambda x: self.to_glyph(x), reduce(lambda x, y: x + y, glyphs.values()))
-        )
+        return list(map(lambda x: self.to_glyph(x), reduce(lambda x, y: x + y, glyphs.values())))

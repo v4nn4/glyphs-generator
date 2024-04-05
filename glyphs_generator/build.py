@@ -1,7 +1,8 @@
 from typing import List, Tuple
 
 from .data import Point, Stroke
-from .generator import GlyphGenerator
+from .generate import GlyphGenerator
+from .intersect import do_intersect
 
 
 def _build_strokes(points: List[Point]) -> List[Tuple[Stroke, Tuple[int, int]]]:
@@ -10,29 +11,11 @@ def _build_strokes(points: List[Point]) -> List[Tuple[Stroke, Tuple[int, int]]]:
         for j, point2 in enumerate(points):
             if point1 != point2:
                 stroke = Stroke(x0=point1.x, y0=point1.y, x1=point2.x, y1=point2.y)
-                reversed_stroke = Stroke(
-                    x0=point2.x, y0=point2.y, x1=point1.x, y1=point1.y
-                )
+                reversed_stroke = Stroke(x0=point2.x, y0=point2.y, x1=point1.x, y1=point1.y)
                 list_strokes = [stroke for (stroke, _) in strokes]
                 if stroke not in list_strokes and reversed_stroke not in list_strokes:
                     strokes.append((stroke, (i, j)))
     return strokes
-
-
-# def _build_stroke_to_point_mapping(nb_points: int) -> Dict[int, Tuple[int, int]]:
-#    stroke_to_point_mapping = {}
-#    visited_pairs = []
-#    i = 0
-#    for p1 in range(nb_points):
-#        for p2 in range(nb_points):
-#            if p1 != p2:
-#                key = f"{p1}_{p2}"
-#                reversed_key = f"{p2}_{p1}"
-#                if key not in visited_pairs and reversed_key not in visited_pairs:
-#                    stroke_to_point_mapping[i] = (p1, p2)
-#                    visited_pairs.append(key)
-#                    i += 1
-#    return stroke_to_point_mapping
 
 
 def _build_transformation_matrix(points: List[Point]) -> List[List[int]]:
@@ -56,17 +39,16 @@ def _build_transformation_matrix(points: List[Point]) -> List[List[int]]:
         raise Exception(f"Point not found for coordinates ({point.x}, {point.y})")
 
     point_transformation_table = {
-        k: {i: get_point_index(fn(point)) for (i, point) in enumerate(points)}
-        for (k, fn) in fns.items()
+        k: {i: get_point_index(fn(point)) for (i, point) in enumerate(points)} for (k, fn) in fns.items()
     }
 
-    fv = point_transformation_table["fv"]
-    fh = point_transformation_table["fh"]
-    r = point_transformation_table["r"]
-    point_transformation_table["fvr"] = {k: fv[r[k]] for k in range(p)}
-    point_transformation_table["fhr"] = {k: fh[r[k]] for k in range(p)}
-    point_transformation_table["r2"] = {k: r[r[k]] for k in range(p)}
-    point_transformation_table["r3"] = {k: r[r[r[k]]] for k in range(p)}
+    fv_map = point_transformation_table["fv"]
+    fh_map = point_transformation_table["fh"]
+    r_map = point_transformation_table["r"]
+    point_transformation_table["fvr"] = {k: fv_map[r_map[k]] for k in range(p)}
+    point_transformation_table["fhr"] = {k: fh_map[r_map[k]] for k in range(p)}
+    point_transformation_table["r2"] = {k: r_map[r_map[k]] for k in range(p)}
+    point_transformation_table["r3"] = {k: r_map[r_map[r_map[k]]] for k in range(p)}
 
     strokes = _build_strokes(points)
 
@@ -76,9 +58,7 @@ def _build_transformation_matrix(points: List[Point]) -> List[List[int]]:
                 return stroke_index
         raise Exception(f"Stroke not found for coordinates ({p1}, {p2})")
 
-    transformation_table = [
-        [_ for _ in point_transformation_table.keys()] for _ in strokes
-    ]
+    transformation_table = [[0 for _ in point_transformation_table.keys()] for _ in strokes]
     for i, (_, (p1, p2)) in enumerate(strokes):
         for j, fn in enumerate(point_transformation_table.values()):
             transformation_table[i][j] = find_stroke(fn[p1], fn[p2])
@@ -86,21 +66,20 @@ def _build_transformation_matrix(points: List[Point]) -> List[List[int]]:
     return transformation_table
 
 
-def _build_intersection_matrix():
-    adjacency_matrix = [
-        [1, 1, 1, 1, 1, 0],
-        [1, 1, 1, 1, 0, 1],
-        [1, 1, 1, 1, 1, 1],
-        [1, 1, 1, 1, 1, 1],
-        [1, 0, 1, 1, 1, 1],
-        [0, 1, 1, 1, 1, 1],
-    ]
-    return adjacency_matrix
+def _build_intersection_matrix(parent_strokes: List[Stroke]):
+    matrix = [[0 for _ in range(len(parent_strokes))] for _ in range(len(parent_strokes))]
+    for i, stroke1 in enumerate(parent_strokes):
+        for j, stroke2 in enumerate(parent_strokes):
+            intersect = do_intersect(
+                stroke1.x0, stroke1.y0, stroke1.x1, stroke1.y1, stroke2.x0, stroke2.y0, stroke2.x1, stroke2.y1
+            )
+            matrix[i][j] = 1 if intersect else 0
+    return matrix
 
 
 def build_generator(anchor_points: List[Point]) -> GlyphGenerator:
     parent_strokes = [stroke for (stroke, _) in _build_strokes(anchor_points)]
-    intersection_matrix = _build_intersection_matrix()
+    intersection_matrix = _build_intersection_matrix(parent_strokes)
     transformation_matrix = _build_transformation_matrix(anchor_points)
 
     return GlyphGenerator(

@@ -1,5 +1,5 @@
-from typing import List
 from dataclasses import dataclass
+from typing import List
 
 
 @dataclass(frozen=True)
@@ -32,10 +32,10 @@ class InternalGlyph:
     identifier: int
 
     def __eq__(self, __value: "InternalGlyph") -> bool:
-        return self.identifier == __value.identifier  # faster eq
+        return self.identifier == __value.identifier  # fast eq
 
     def __hash__(self) -> int:
-        return self.identifier  # faster hash
+        return self.identifier  # fast hash
 
     def __or__(self, __value: "InternalGlyph") -> "InternalGlyph":
         return InternalGlyph(
