@@ -25,6 +25,12 @@ class Glyph:
 class InternalStroke:
     index: int
 
+    def __eq__(self, __value: "InternalStroke") -> bool:
+        return self.index == __value.index
+
+    def __hash__(self) -> int:
+        return self.index
+
 
 @dataclass()
 class InternalGlyph:
@@ -34,11 +40,18 @@ class InternalGlyph:
     def __eq__(self, __value: "InternalGlyph") -> bool:
         return self.identifier == __value.identifier  # fast eq
 
-    def __hash__(self) -> int:
-        return self.identifier  # fast hash
-
     def __or__(self, __value: "InternalGlyph") -> "InternalGlyph":
+        indices = [s.index for s in self.strokes] + [s.index for s in __value.strokes]
+        indices = list(set(indices))
         return InternalGlyph(
-            strokes=list(set(self.strokes + __value.strokes)),
+            strokes=[InternalStroke(index=index) for index in indices],
             identifier=self.identifier | __value.identifier,
         )
+
+    @staticmethod
+    def empty() -> "InternalGlyph":
+        return InternalGlyph(strokes=[], identifier=0)
+
+    @staticmethod
+    def from_stroke(stroke: InternalStroke) -> "InternalGlyph":
+        return InternalGlyph(strokes=[stroke], identifier=2**stroke.index)

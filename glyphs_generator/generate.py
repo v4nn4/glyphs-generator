@@ -16,12 +16,6 @@ class GlyphGenerator:
         self.transformation_table = transformation_matrix
         self.nb_transformations = len(transformation_matrix[0])
 
-    def add(self, glyph1: InternalGlyph, glyph2: InternalGlyph) -> InternalGlyph:
-        return InternalGlyph(
-            strokes=list(set(glyph1.strokes + glyph2.strokes)),
-            identifier=glyph1.identifier | glyph2.identifier,
-        )
-
     def are_strokes_intersecting(self, glyph: InternalGlyph) -> bool:
         indices = [stroke.index for stroke in glyph.strokes]
         for i in indices:
@@ -34,23 +28,23 @@ class GlyphGenerator:
         return True
 
     def transform(self, glyph: InternalGlyph) -> List[InternalGlyph]:
-        result = [InternalGlyph(strokes=[], identifier=0) for _ in range(self.nb_transformations)]
+        result = [InternalGlyph.empty() for _ in range(self.nb_transformations)]
         for i in range(self.nb_transformations):
             for stroke in glyph.strokes:
                 stroke_index = self.transformation_table[stroke.index][i]
-                result[i].strokes.append(InternalStroke(index=stroke_index))
-                result[i].identifier |= 2**stroke_index
+                glyph_ = InternalGlyph.from_stroke(InternalStroke(index=stroke_index))
+                result[i] = result[i] | glyph_
         return result
 
     def to_glyph(self, glyph: InternalGlyph) -> Glyph:
         return Glyph(strokes=[self.parent_strokes[s.index] for s in glyph.strokes])
 
     def from_glyph(self, glyph: Glyph) -> InternalGlyph:
-        strokes = [self.from_stroke(stroke).strokes[0] for stroke in glyph.strokes]
-        identifier = 0
-        for stroke in strokes:
-            identifier |= 2**stroke.index
-        return InternalGlyph(strokes, identifier)
+        internal_strokes = [self.from_stroke(stroke) for stroke in glyph.strokes]
+        internal_glyph = InternalGlyph.empty()
+        for stroke in internal_strokes:
+            internal_glyph = internal_glyph | stroke
+        return internal_glyph
 
     def from_stroke(self, stroke: Stroke) -> InternalGlyph:
         for i, stroke_ in enumerate(self.parent_strokes):
@@ -72,16 +66,20 @@ class GlyphGenerator:
         n = len(strokes)
         seed_internal = self.from_stroke(seed)
         strokes_internal = [self.from_stroke(stroke) for stroke in strokes]
-        glyphs: Dict[int, List[InternalGlyph]] = {i: [] for i in range(n)}
-        glyphs[0].append(seed_internal)
+        glyphs: Dict[int, List[InternalGlyph]] = {i + 1: [] for i in range(n)}
+        glyphs[1].append(seed_internal)
         for i, last_glyphs in glyphs.items():
-            if i == n - 1:
+            if i == n:
                 break
             for glyph in last_glyphs:
                 for stroke in strokes_internal:
-                    next_glyph = self.add(glyph, stroke)
-                    if self.are_strokes_intersecting(next_glyph):
+                    next_glyph = glyph | stroke
+                    if (
+                        len(next_glyph.strokes) == i + 1
+                        and next_glyph not in glyphs[i + 1]
+                        and self.are_strokes_intersecting(next_glyph)
+                    ):
                         transformed_glyphs = self.transform(next_glyph)
-                        if next_glyph not in last_glyphs and all([g not in glyphs[i + 1] for g in transformed_glyphs]):
+                        if all([g not in glyphs[i + 1] for g in transformed_glyphs]):
                             glyphs[i + 1].append(next_glyph)
         return list(map(lambda x: self.to_glyph(x), reduce(lambda x, y: x + y, glyphs.values())))

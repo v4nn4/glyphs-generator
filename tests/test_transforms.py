@@ -11,7 +11,8 @@ def test_flip_horizontal(basic_generator: GlyphGenerator) -> None:
     for stroke in [d1, d2]:
         assert stroke in generator.transform(d1)
 
-    assert (rv | th | d1) in generator.transform(lv | bh | d1)
+    transformed = generator.transform(lv | bh | d1)
+    assert (rv | th | d1) in transformed
 
 
 def test_equal(advanced_generator: GlyphGenerator) -> None:

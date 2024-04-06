@@ -27,6 +27,7 @@ def test_internal_double_stroke(basic_generator: GlyphGenerator) -> None:
             assert glyph == glyph_
 
             assert g1 | g2 == g2 | g1
+            assert g1 | g2 in [g2 | g1]
 
 
 def test_internal_triple_stroke(basic_generator: GlyphGenerator) -> None:
