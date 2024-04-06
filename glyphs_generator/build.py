@@ -28,7 +28,7 @@ def _build_transformation_matrix(points: List[Point]) -> List[List[int]]:
         return Point(x=-point.x, y=point.y)
 
     def r(point):
-        return Point(x=point.y, y=point.x)
+        return Point(x=point.y, y=-point.x)
 
     fns = {"fv": fv, "fh": fh, "r": r}
 

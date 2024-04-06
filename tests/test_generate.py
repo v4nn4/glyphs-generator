@@ -1,9 +1,9 @@
-from glyphs_generator import Stroke
+from glyphs_generator import GlyphGenerator
 
 
-def test_generate(basic_generator):
+def test_generate(basic_generator: GlyphGenerator) -> None:
     generator = basic_generator
-    (th, lv, d1, d2, rv, bh) = [generator.to_internal(x) for x in generator.parent_strokes]
+    (th, lv, d1, d2, rv, bh) = [generator.from_stroke(x) for x in generator.parent_strokes]
     seed = generator.parent_strokes[0]
     glyphs = generator.generate(generator.parent_strokes, seed)
 
@@ -23,11 +23,3 @@ def test_generate(basic_generator):
 
     # order 6
     assert generator.to_glyph(th | lv | d1 | d2 | rv | bh) in glyphs
-
-
-# def test_with_stroke_subset(advanced_generator):
-#    generator = advanced_generator
-#    strokes = [Stroke(-1, 0, 1, 0), Stroke(0, 1, 0, -1), Stroke(1, -1, -1, -1)]
-#    seed = strokes[0]
-#    glyphs = generator.generate(strokes, seed)
-#    assert len(glyphs) == 4

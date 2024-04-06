@@ -45,7 +45,14 @@ class GlyphGenerator:
     def to_glyph(self, glyph: InternalGlyph) -> Glyph:
         return Glyph(strokes=[self.parent_strokes[s.index] for s in glyph.strokes])
 
-    def to_internal(self, stroke: Stroke) -> InternalGlyph:
+    def from_glyph(self, glyph: Glyph) -> InternalGlyph:
+        strokes = [self.from_stroke(stroke).strokes[0] for stroke in glyph.strokes]
+        identifier = 0
+        for stroke in strokes:
+            identifier |= 2**stroke.index
+        return InternalGlyph(strokes, identifier)
+
+    def from_stroke(self, stroke: Stroke) -> InternalGlyph:
         for i, stroke_ in enumerate(self.parent_strokes):
             if (
                 stroke_.x0 == stroke.x0
@@ -63,8 +70,8 @@ class GlyphGenerator:
 
     def generate(self, strokes: List[Stroke], seed: Stroke) -> List[Glyph]:
         n = len(strokes)
-        seed_internal = self.to_internal(seed)
-        strokes_internal = [self.to_internal(stroke) for stroke in strokes]
+        seed_internal = self.from_stroke(seed)
+        strokes_internal = [self.from_stroke(stroke) for stroke in strokes]
         glyphs: Dict[int, List[InternalGlyph]] = {i: [] for i in range(n)}
         glyphs[0].append(seed_internal)
         for i, last_glyphs in glyphs.items():
