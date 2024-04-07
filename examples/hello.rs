@@ -3,11 +3,11 @@ use glyphs_generator::run;
 use std::fs;
 
 fn main() {
-    let file_content = fs::read_to_string(
+    let input = fs::read_to_string(
         "/Users/romflorentz/Documents/Repos/glyphs-generator/examples/input.json",
     )
-    .expect("Failed to read file")
+    .expect("Failed to read input file")
     .to_string();
-    let output = run(file_content);
-    println!("{}", output);
+    let result = run(input);
+    println!("{}", result);
 }

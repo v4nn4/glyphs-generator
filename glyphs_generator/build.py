@@ -1,6 +1,6 @@
 from typing import List, Tuple
 
-from .data import Point, Stroke
+from .data import Point, Stroke, GeneratorParameters
 from .generate import GlyphGenerator
 from .intersect import do_intersect
 
@@ -77,13 +77,13 @@ def _build_intersection_matrix(parent_strokes: List[Stroke]):
     return matrix
 
 
-def build_generator(anchor_points: List[Point]) -> GlyphGenerator:
+def initialize_generator_parameters(anchor_points: List[Point]) -> GeneratorParameters:
     parent_strokes = [stroke for (stroke, _) in _build_strokes(anchor_points)]
     intersection_matrix = _build_intersection_matrix(parent_strokes)
     transformation_matrix = _build_transformation_matrix(anchor_points)
-
-    return GlyphGenerator(
+    parameters = GeneratorParameters(
         parent_strokes=parent_strokes,
         intersection_matrix=intersection_matrix,
         transformation_matrix=transformation_matrix,
     )
+    return parameters

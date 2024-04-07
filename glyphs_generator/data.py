@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from typing import List
+from pydantic import BaseModel
 
 
 @dataclass(frozen=True)
@@ -9,7 +10,7 @@ class Point:
 
 
 @dataclass(frozen=True, repr=True)
-class Stroke:
+class Stroke(BaseModel):
     x0: float
     y0: float
     x1: float
@@ -19,6 +20,12 @@ class Stroke:
 @dataclass(frozen=True)
 class Glyph:
     strokes: List[Stroke]
+
+
+class GeneratorParameters(BaseModel):
+    parent_strokes: List[Stroke]
+    intersection_matrix: List[List[int]]
+    transformation_matrix: List[List[int]]
 
 
 @dataclass(frozen=True)

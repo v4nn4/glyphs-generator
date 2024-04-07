@@ -1,20 +1,15 @@
 from functools import reduce
 from typing import Dict, List
 
-from .data import Glyph, InternalGlyph, InternalStroke, Stroke
+from .data import Glyph, InternalGlyph, InternalStroke, Stroke, GeneratorParameters
 
 
 class GlyphGenerator:
-    def __init__(
-        self,
-        parent_strokes: List[Stroke],
-        intersection_matrix: List[List[int]],
-        transformation_matrix: List[List[int]],
-    ):
-        self.parent_strokes = parent_strokes
-        self.intersection_matrix = intersection_matrix
-        self.transformation_table = transformation_matrix
-        self.nb_transformations = len(transformation_matrix[0])
+    def __init__(self, parameters: GeneratorParameters):
+        self.parent_strokes = parameters.parent_strokes
+        self.intersection_matrix = parameters.intersection_matrix
+        self.transformation_table = parameters.transformation_matrix
+        self.nb_transformations = len(parameters.transformation_matrix[0])
 
     def are_strokes_intersecting(self, glyph: InternalGlyph) -> bool:
         indices = [stroke.index for stroke in glyph.strokes]
@@ -38,13 +33,6 @@ class GlyphGenerator:
 
     def to_glyph(self, glyph: InternalGlyph) -> Glyph:
         return Glyph(strokes=[self.parent_strokes[s.index] for s in glyph.strokes])
-
-    def from_glyph(self, glyph: Glyph) -> InternalGlyph:
-        internal_strokes = [self.from_stroke(stroke) for stroke in glyph.strokes]
-        internal_glyph = InternalGlyph.empty()
-        for stroke in internal_strokes:
-            internal_glyph = internal_glyph | stroke
-        return internal_glyph
 
     def from_stroke(self, stroke: Stroke) -> InternalGlyph:
         for i, stroke_ in enumerate(self.parent_strokes):

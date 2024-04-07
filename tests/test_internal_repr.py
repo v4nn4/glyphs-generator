@@ -1,4 +1,5 @@
 from glyphs_generator import GlyphGenerator
+from .conftest import from_glyph
 
 
 def test_internal_single_stroke(basic_generator: GlyphGenerator) -> None:
@@ -7,7 +8,7 @@ def test_internal_single_stroke(basic_generator: GlyphGenerator) -> None:
         glyph = generator.to_glyph(generator.from_stroke(stroke))
         stroke_ = glyph.strokes[0]
         assert stroke == stroke_
-        glyph_ = generator.to_glyph(generator.from_glyph(glyph))
+        glyph_ = generator.to_glyph(from_glyph(generator, glyph))
         assert glyph == glyph_
 
 
@@ -23,7 +24,7 @@ def test_internal_double_stroke(basic_generator: GlyphGenerator) -> None:
                 assert g == g1
             else:
                 assert len(g.strokes) == 2
-            glyph_ = generator.to_glyph(generator.from_glyph(glyph))
+            glyph_ = generator.to_glyph(from_glyph(generator, glyph))
             assert glyph == glyph_
 
             assert g1 | g2 == g2 | g1
@@ -40,7 +41,7 @@ def test_internal_triple_stroke(basic_generator: GlyphGenerator) -> None:
                 g3 = generator.from_stroke(s3)
                 g = g1 | g2 | g3
                 glyph = generator.to_glyph(g)
-                glyph_ = generator.to_glyph(generator.from_glyph(glyph))
+                glyph_ = generator.to_glyph(from_glyph(generator, glyph))
                 assert glyph == glyph_
 
                 assert g1 | g2 | g3 == g2 | g1 | g3 == g1 | g3 | g2 == g2 | g3 | g1 == g3 | g1 | g2 == g3 | g2 | g1

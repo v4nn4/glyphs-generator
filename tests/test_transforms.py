@@ -1,4 +1,5 @@
 from glyphs_generator import Stroke, Glyph, GlyphGenerator
+from .conftest import from_glyph
 
 
 def test_flip_horizontal(basic_generator: GlyphGenerator) -> None:
@@ -17,42 +18,46 @@ def test_flip_horizontal(basic_generator: GlyphGenerator) -> None:
 
 def test_equal(advanced_generator: GlyphGenerator) -> None:
     generator = advanced_generator
-    g1 = generator.from_glyph(
+    g1 = from_glyph(
+        generator,
         Glyph(
             strokes=[
                 Stroke(x0=-1, y0=-1, x1=-1, y1=1),
                 Stroke(x0=-1, y0=1, x1=1, y1=1),
             ]
-        )
+        ),
     )
-    g2 = generator.from_glyph(
+    g2 = from_glyph(
+        generator,
         Glyph(
             strokes=[
                 Stroke(x0=-1, y0=-1, x1=-1, y1=1),
                 Stroke(x0=-1, y0=1, x1=1, y1=1),
             ]
-        )
+        ),
     )
     transformed_g1 = generator.transform(glyph=g1)
     assert any([g == g2 for g in transformed_g1])
 
-    g1 = generator.from_glyph(
+    g1 = from_glyph(
+        generator,
         Glyph(
             strokes=[
                 Stroke(x0=-1, y0=-1, x1=-1, y1=1),
                 Stroke(x0=-1, y0=0, x1=1, y1=0),
                 Stroke(x0=-1, y0=1, x1=1, y1=1),
             ]
-        )
+        ),
     )
-    g2 = generator.from_glyph(
+    g2 = from_glyph(
+        generator,
         Glyph(
             strokes=[
                 Stroke(x0=-1, y0=-1, x1=-1, y1=1),
                 Stroke(x0=0, y0=1, x1=0, y1=-1),
                 Stroke(x0=-1, y0=1, x1=1, y1=1),
             ]
-        )
+        ),
     )
     transformed_g1 = generator.transform(glyph=g1)
     assert any([g == g2 for g in transformed_g1])

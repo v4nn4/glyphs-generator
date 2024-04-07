@@ -1,86 +1,72 @@
-use crate::rasterize::rasterize;
-use crate::Coordinate;
-use crate::Stroke;
+use std::collections::HashSet;
+
+use crate::stroke::InternalStroke;
+use crate::stroke::Stroke;
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Glyph {
     pub strokes: Vec<Stroke>,
-    raster: Vec<Vec<u8>>,
-    dimension: usize,
-}
-
-impl Glyph {
-    pub fn new(strokes: &Vec<Stroke>, dimension: usize) -> Self {
-        Self {
-            strokes: strokes.to_vec(),
-            raster: rasterize(strokes, dimension),
-            dimension: dimension,
-        }
-    }
-
-    fn apply_coordinate_transformation<F>(&self, transformation: F) -> Self
-    where
-        F: Fn(&Coordinate) -> Coordinate,
-    {
-        let rotated_strokes = self
-            .strokes
-            .iter()
-            .map(|stroke| {
-                let start = transformation(&stroke.start);
-                let end = transformation(&stroke.end);
-                Stroke { start, end }
-            })
-            .collect();
-
-        Self::new(&rotated_strokes, self.dimension)
-    }
-
-    pub fn rot90(&self) -> Self {
-        self.apply_coordinate_transformation(|coord| coord.rot90())
-    }
-
-    pub fn flip_left(&self) -> Self {
-        self.apply_coordinate_transformation(|coord| coord.flip_left())
-    }
-
-    pub fn flip_up(&self) -> Self {
-        self.apply_coordinate_transformation(|coord| coord.flip_up())
-    }
-
-    pub fn intersect(&self, stroke: &Stroke, dimension: usize) -> bool {
-        let raster = &self.raster;
-        let stroke_raster = rasterize(&vec![stroke.clone()], dimension);
-
-        for y in 0..dimension {
-            for x in 0..dimension {
-                if raster[y][x] == 1 && stroke_raster[y][x] == 1 {
-                    return true;
-                }
-            }
-        }
-
-        false
-    }
-
-    pub fn contains_stroke(&self, stroke: &Stroke) -> bool {
-        self.strokes.iter().any(|s| s == stroke)
-    }
 }
 
 impl PartialEq for Glyph {
     fn eq(&self, other: &Self) -> bool {
-        let raster = &self.raster;
-        let other_raster = &other.raster;
+        let self_set: HashSet<_> = self.strokes.iter().collect();
+        let other_set: HashSet<_> = other.strokes.iter().collect();
 
-        for (row_self, row_other) in raster.iter().zip(other_raster.iter()) {
-            for (val_self, val_other) in row_self.iter().zip(row_other.iter()) {
-                if val_self != val_other {
-                    return false;
-                }
-            }
-        }
-
-        true
+        self_set == other_set
     }
 }
+
+impl Eq for Glyph {}
+
+#[derive(Debug, Clone)]
+pub struct InternalGlyph {
+    pub strokes: Vec<InternalStroke>,
+    pub identifier: u64,
+}
+
+impl InternalGlyph {
+    pub fn empty() -> Self {
+        InternalGlyph {
+            strokes: vec![],
+            identifier: 0,
+        }
+    }
+
+    pub fn from_stroke(stroke: InternalStroke) -> Self {
+        let identifier = 1 << stroke.index;
+        InternalGlyph {
+            strokes: vec![stroke],
+            identifier,
+        }
+    }
+
+    pub fn union(&self, other: &Self) -> Self {
+        let mut indices: Vec<usize> = self.strokes.iter().map(|s| s.index).collect();
+        indices.extend(other.strokes.iter().map(|s| s.index));
+
+        let unique_indices: Vec<usize> = indices
+            .into_iter()
+            .collect::<std::collections::HashSet<_>>()
+            .into_iter()
+            .collect();
+        let new_strokes: Vec<InternalStroke> = unique_indices
+            .into_iter()
+            .map(|index| InternalStroke { index })
+            .collect();
+
+        InternalGlyph {
+            strokes: new_strokes,
+            identifier: self.identifier | other.identifier,
+        }
+    }
+}
+
+impl PartialEq for InternalGlyph {
+    fn eq(&self, other: &Self) -> bool {
+        self.identifier == other.identifier
+    }
+}
+
+impl Eq for InternalGlyph {}

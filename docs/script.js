@@ -15,9 +15,9 @@ let getCoordinatesFromId = (id) => {
   const n = 3;
   let j = identifier % n;
   let i = Math.floor(identifier / n);
-  let x = i / (n - 1) - 0.5; // i*a - 0.5 (n-1)*a - 0.5= 0.5
+  let x = i / (n - 1) - 0.5;
   let y = j / (n - 1) - 0.5;
-  return [x, y];
+  return [2 * x, 2 * y];
 };
 
 function getCenter(element) {
@@ -110,13 +110,6 @@ let render = () => {
   let canvasContainer = document.createElement("div");
   canvasContainer.appendChild(canvas);
   let configurationPanel = document.createElement("div");
-  let dimensionInput = document.createElement("input");
-  dimensionInput.type = "number";
-  dimensionInput.id = "dimensionInput";
-  dimensionInput.onchange = () => {
-    compute();
-  };
-  configurationPanel.appendChild(dimensionInput);
   canvasContainer.appendChild(configurationPanel);
   mainContainer.appendChild(canvasContainer);
   let resultDiv = document.createElement("div");
@@ -136,10 +129,10 @@ let generateGlyphSvg = (strokes, color) => {
   strokes.forEach((stroke) => {
     let line = document.createElementNS("http://www.w3.org/2000/svg", "line");
     line.style.padding = "2px";
-    line.setAttribute("x1", 40 * (0.5 + stroke.start.x));
-    line.setAttribute("y1", 40 * (0.5 + stroke.start.y));
-    line.setAttribute("x2", 40 * (0.5 + stroke.end.x));
-    line.setAttribute("y2", 40 * (0.5 + stroke.end.y));
+    line.setAttribute("x1", 40 * (0.5 + stroke.x0 / 2));
+    line.setAttribute("y1", 40 * (0.5 + stroke.y0 / 2));
+    line.setAttribute("x2", 40 * (0.5 + stroke.x1 / 2));
+    line.setAttribute("y2", 40 * (0.5 + stroke.y1 / 2));
     line.setAttribute("stroke", color);
     line.setAttribute("stroke-width", 3);
     svg.appendChild(line);
@@ -148,26 +141,26 @@ let generateGlyphSvg = (strokes, color) => {
 };
 
 let compute = () => {
-  let pixel_dimension = parseFloat(
-    document.getElementById("dimensionInput").value
-  );
-  let input = { strokes: [], pixel_dimension: pixel_dimension };
+  let input = { strokes: [] };
   state.selection.selectedPaths.forEach((path) => {
-    input.strokes.push({ start: path[0], end: path[1] });
+    input.strokes.push({
+      x0: path[0][0],
+      y0: path[0][1],
+      x1: path[1][0],
+      y1: path[1][1],
+    });
   });
   console.log(JSON.stringify(input));
   let result = JSON.parse(run(JSON.stringify(input)));
-  console.log(result.report);
+  console.log(result);
   let resultDiv = document.getElementById("result");
   resultDiv.innerHTML = "";
   resultDiv.style.display = "flex";
-  for (let [index, glyphs] of Object.entries(result.glyphs)) {
-    glyphs.forEach((glyph) => {
-      let color = "black"; // palette[index % palette.length];
-      let glyphSvg = generateGlyphSvg(glyph.strokes, color);
-      resultDiv.appendChild(glyphSvg);
-    });
-  }
+  result.forEach((glyph) => {
+    let color = "black"; // palette[index % palette.length];
+    let glyphSvg = generateGlyphSvg(glyph.strokes, color);
+    resultDiv.appendChild(glyphSvg);
+  });
 };
 
 async function loadWasm() {
