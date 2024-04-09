@@ -1,4 +1,5 @@
-import init, { run } from "./pkg/glyphs_generator.js";
+import init, { compute, initialize } from "./pkg/glyphs_generator.js";
+import load_parameters from "./parameters.js";
 
 let state = {
   selection: {
@@ -66,7 +67,7 @@ let createSquare = (id, width, margin) => {
         line.id = `line-${state.lines.length + 1}`;
       }
       state.selection.selectedAnchorPoint = null;
-      compute();
+      run();
     }
   };
   return div;
@@ -140,18 +141,20 @@ let generateGlyphSvg = (strokes, color) => {
   return svg;
 };
 
-let compute = () => {
-  let input = { strokes: [] };
+let run = () => {
+  let computable = { strokes: [] };
   state.selection.selectedPaths.forEach((path) => {
-    input.strokes.push({
+    computable.strokes.push({
       x0: path[0][0],
       y0: path[0][1],
       x1: path[1][0],
       y1: path[1][1],
     });
   });
-  console.log(JSON.stringify(input));
-  let result = JSON.parse(run(JSON.stringify(input)));
+  console.log(JSON.stringify(computable));
+  let parameters = load_parameters.load_parameters();
+  initialize(JSON.stringify(parameters));
+  let result = JSON.parse(compute(JSON.stringify(computable)));
   console.log(result);
   let resultDiv = document.getElementById("result");
   resultDiv.innerHTML = "";

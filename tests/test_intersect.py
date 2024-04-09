@@ -1,10 +1,23 @@
-from glyphs_generator import do_intersect, GlyphGenerator
+from glyphs_generator import do_intersect, GlyphGenerator, are_strokes_linked
 
 
 def test_intersect():
     assert do_intersect(-1, -1, 1, 1, 1, 1, -1, -1)
     assert do_intersect(-1, -1, -1, 1, -1, 1, 1, 1)
     assert not do_intersect(-1, -1, -1, 1, 1, -1, 1, 1)
+    assert not do_intersect(-1, 1, 0, 0, 0, -1, 1, 0)
+
+
+def test_are_strokes_linked():
+    assert are_strokes_linked(strokes=[0], intersection_matrix=[[1]])
+    assert are_strokes_linked(strokes=[0, 1], intersection_matrix=[[1, 1], [1, 1]])
+    assert not are_strokes_linked(strokes=[0, 1], intersection_matrix=[[1, 0], [0, 1]])
+    assert not are_strokes_linked(
+        strokes=[0, 1, 2, 3], intersection_matrix=[[1, 1, 0, 0], [1, 1, 0, 0], [0, 0, 1, 1], [0, 0, 1, 1]]
+    )
+    assert not are_strokes_linked(
+        strokes=[0, 3], intersection_matrix=[[1, 1, 1, 0], [1, 1, 0, 1], [1, 1, 0, 1], [0, 1, 1, 1]]
+    )
 
 
 def test_intersection(basic_generator: GlyphGenerator):

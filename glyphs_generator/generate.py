@@ -2,6 +2,7 @@ from functools import reduce
 from typing import Dict, List
 
 from .data import Glyph, InternalGlyph, InternalStroke, Stroke, GeneratorParameters
+from .intersect import are_strokes_linked
 
 
 class GlyphGenerator:
@@ -13,14 +14,7 @@ class GlyphGenerator:
 
     def are_strokes_intersecting(self, glyph: InternalGlyph) -> bool:
         indices = [stroke.index for stroke in glyph.strokes]
-        for i in indices:
-            intersection_found = False
-            for j in indices:
-                if i != j and self.intersection_matrix[i][j] == 1:
-                    intersection_found = True
-            if not intersection_found:
-                return False
-        return True
+        return are_strokes_linked(indices, self.intersection_matrix)
 
     def transform(self, glyph: InternalGlyph) -> List[InternalGlyph]:
         result = [InternalGlyph.empty() for _ in range(self.nb_transformations)]

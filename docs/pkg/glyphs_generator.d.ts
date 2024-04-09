@@ -1,19 +1,24 @@
 /* tslint:disable */
 /* eslint-disable */
 /**
-* @param {string} input
+* @param {string} parameters_json
+*/
+export function initialize(parameters_json: string): void;
+/**
+* @param {string} computable_json
 * @returns {string}
 */
-export function run(input: string): string;
+export function compute(computable_json: string): string;
 
 export type InitInput = RequestInfo | URL | Response | BufferSource | WebAssembly.Module;
 
 export interface InitOutput {
   readonly memory: WebAssembly.Memory;
-  readonly run: (a: number, b: number, c: number) => void;
-  readonly __wbindgen_add_to_stack_pointer: (a: number) => number;
+  readonly initialize: (a: number, b: number) => void;
+  readonly compute: (a: number, b: number, c: number) => void;
   readonly __wbindgen_malloc: (a: number, b: number) => number;
   readonly __wbindgen_realloc: (a: number, b: number, c: number, d: number) => number;
+  readonly __wbindgen_add_to_stack_pointer: (a: number) => number;
   readonly __wbindgen_free: (a: number, b: number, c: number) => void;
 }
 
