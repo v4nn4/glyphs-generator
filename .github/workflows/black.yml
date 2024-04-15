@@ -21,11 +21,6 @@ jobs:
       uses: actions/setup-python@v5
       with:
         python-version: '3.11'
-    - name: Cache Poetry virtual environment
-      uses: actions/cache@v3
-      with:
-        path: ~/.cache/pypoetry
-        key: ${{ runner.os }}-poetry-${{ hashFiles('**/poetry.lock') }}
     - name: Reuse cached dependencies
       run: poetry install
     - uses: psf/black@stable
