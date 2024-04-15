@@ -1,5 +1,11 @@
 # glyphs-generator
 
+<p>
+<a href="https://github.com/v4nn4/glyphs-generator/actions"><img alt="Actions Status" src="https://github.com/v4nn4/glyphs-generator/actions/workflows/pytest.yml/badge.svg"></a>
+<a href="https://github.com/psf/black"><img alt="Code style: black" src="https://img.shields.io/badge/code%20style-black-000000.svg"></a>
+</p>
+
+
 A glyph generation tool with specified constraints:
 
 - Glyphs are deemed identical if they can be converted into one another through rotation, or by flipping them horizontally or vertically
