@@ -1,7 +1,6 @@
 from typing import List, Tuple
 
 from .data import Point, Stroke, GeneratorParameters
-from .generate import GlyphGenerator
 from .intersect import do_intersect
 
 
