@@ -1,3 +1,5 @@
+![alt text](./assets/glyphs_hero.png)
+
 # glyphs-generator
 
 <p>
@@ -5,34 +7,14 @@
 <a href="https://github.com/psf/black"><img alt="Code style: black" src="https://img.shields.io/badge/code%20style-black-000000.svg"></a>
 </p>
 
+An opiniated glyph generation tool.
 
-A glyph generation tool with specified constraints:
+👉 Companion blog post: https://v4nn4.github.io/posts/glyph-generation/.
 
-- Glyphs are deemed identical if they can be converted into one another through rotation, or by flipping them horizontally or vertically
-- With the exception of single-stroke glyphs, each stroke must intersect with another stroke
+## Concept
 
-The tool examines a sequence of potential strokes and computes the equivalence classes for glyphs composed of any stroke combination.
+The idea is to generate glyphs from a set of points on a grid. Since the number of possible glyphs increases exponentially with the number of points, we apply some geometrical constraints to narrow down our search. We then derive an efficient search algorithm.
 
-## Alphabet generation
+## Playground
 
-We generated alphabets based on some glyph primitives with 6 strokes or 8 strokes.
-
-### 6-A
-
-![primitives_6-A](assets/glyphs_6a.png)
-
-### 6-B
-
-![primitives_6-B](assets/glyphs_6b.png)
-
-### 6-C
-
-![primitives_6-C](assets/glyphs_6c.png)
-
-### 8-A
-
-![primitives_8-A](assets/glyphs_8a.png)
-
-### 10-A
-
-![primitives_8-A](assets/glyphs_10a.png)
+A playground is available [here](https://v4nn4.github.io/glyphs-generator/) for you to try! It is based on a blazing fast [Rust implementation](https://github.com/v4nn4/glyphs-generator-rs) that runs in the browser using WebAssembly and wasm-bindgen.
