@@ -170,5 +170,21 @@ async function loadWasm() {
   await init();
 }
 
-loadWasm();
-render();
+let isMobileDevice = () => {
+  const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+
+  // Regular expressions for mobile detection
+  return /android|avantgo|bada\/|blackberry|bb10|opera mini|opera mobi|iemobile|iphone|ipad|ipod|iemobile|mobile.+firefox|windows phone|kindle|silk|gecko\/|webos/i.test(
+    userAgent
+  );
+};
+
+if (isMobileDevice()) {
+  let warning = document.getElementById("mobileWarning");
+  warning.style.display = "flex";
+  let footer = document.getElementById("footer");
+  footer.style.display = "none";
+} else {
+  loadWasm();
+  render();
+}

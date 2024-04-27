@@ -48,3 +48,11 @@ footer {
 #icons > a:hover {
     border: 0;
 }
+#mobileWarning {
+    display: none;
+    padding: 1em;
+    background:#FFFBDA;
+    font-size: 3rem;
+    border-radius: 2rem;
+    color: #5a5a5a;
+}
