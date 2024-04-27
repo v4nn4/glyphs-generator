@@ -1,6 +1,6 @@
 ![alt text](./assets/glyphs_hero.png)
 
-# glyphs-generator
+# glyphs-generator | [demo](https://v4nn4.github.io/glyphs-generator/)
 
 <p>
 <a href="https://github.com/v4nn4/glyphs-generator/actions"><img alt="Actions Status" src="https://github.com/v4nn4/glyphs-generator/actions/workflows/test.yml/badge.svg"></a>
