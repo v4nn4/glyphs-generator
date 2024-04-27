@@ -7,7 +7,7 @@
 <a href="https://github.com/psf/black"><img alt="Code style: black" src="https://img.shields.io/badge/code%20style-black-000000.svg"></a>
 </p>
 
-An opiniated glyph generation tool.
+A glyph generation tool with geometric constraints.
 
 👉 Companion blog post: https://v4nn4.github.io/posts/glyph-generation/.
 
