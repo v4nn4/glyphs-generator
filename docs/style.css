@@ -5,7 +5,10 @@ body {
     padding-right: 35px;
     padding-top: 2vh;
     color: gray;
-    min-height: 92vh;
+    margin: 0;
+    height: 100vh;
+    box-sizing: border-box;
+    overflow: hidden;
     display: flex;
     flex-direction: column;
 }
@@ -14,8 +17,26 @@ body {
     border-radius: 50%;
 }
 .anchorPoint:hover {
-    background-color: cyan;
+    background-color: #9e9e9e;
     cursor: pointer;
+}
+#app {
+    display: flex;
+    flex: 1;
+    min-height: 0;
+}
+#leftPanel {
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+#rightPanel {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    -webkit-mask-image: linear-gradient(to bottom, black calc(100% - 70px), transparent);
+    mask-image: linear-gradient(to bottom, black calc(100% - 70px), transparent);
 }
 #content {
     display: flex;
@@ -29,24 +50,48 @@ a:visited {
     text-decoration: none;
 }
 a:hover {
-    border-top:1px solid black
-}
-a > svg:hover {
-    fill: cyan
+    text-decoration: underline;
 }
 footer {
-    display: flex;
-    justify-content: space-between;
     margin-left: 3rem;
-    margin-right: 3rem;
     margin-bottom: 1rem;
-    margin-top: auto;
 }
-#icons {
-    align-self: center;
+#footerText {
+    width: 320px;
+    overflow-wrap: break-word;
 }
-#icons > a:hover {
-    border: 0;
+#instructions {
+    font-size: 1rem;
+}
+#concept {
+    font-size: 0.75rem;
+}
+#credits {
+    font-size: 0.75rem;
+}
+#backToTop {
+    position: fixed;
+    bottom: 1.5rem;
+    right: 1.5rem;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid black;
+    background: white;
+    cursor: pointer;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+#backToTop.visible {
+    opacity: 0.6;
+    pointer-events: auto;
+}
+#backToTop.visible:hover {
+    opacity: 1;
 }
 #mobileWarning {
     display: none;

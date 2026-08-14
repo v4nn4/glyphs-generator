@@ -118,7 +118,14 @@ let render = () => {
   resultDiv.style.display = "flex";
   resultDiv.style.flexWrap = "wrap";
   resultDiv.style.margin = `${margin}px`;
-  mainContainer.appendChild(resultDiv);
+  let rightPanel = document.getElementById("rightPanel");
+  rightPanel.appendChild(resultDiv);
+  let backToTop = document.getElementById("backToTop");
+  rightPanel.addEventListener("scroll", () => {
+    backToTop.classList.toggle("visible", rightPanel.scrollTop > 150);
+  });
+  backToTop.onclick = () =>
+    rightPanel.scrollTo({ top: 0, behavior: "smooth" });
 };
 
 let generateGlyphSvg = (strokes, color) => {
