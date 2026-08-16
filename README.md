@@ -1,6 +1,6 @@
 ![alt text](./assets/glyphs_hero.png)
 
-# glyphs-generator | [demo](https://v4nn4.github.io/glyphs-generator/)
+# glyphs-generator | [demo](https://romainflorentz.com/glyphs-generator)
 
 <p>
 <a href="https://github.com/v4nn4/glyphs-generator/actions"><img alt="Actions Status" src="https://github.com/v4nn4/glyphs-generator/actions/workflows/test.yml/badge.svg"></a>
@@ -9,7 +9,7 @@
 
 A glyph generation tool with geometric constraints.
 
-👉 Companion blog post: https://v4nn4.github.io/posts/glyph-generation/.
+👉 Companion blog post: https://romainflorentz.com/blog/glyph-generation.
 
 ## Concept
 
@@ -17,4 +17,4 @@ The idea is to generate glyphs from a set of points on a grid. Since the number 
 
 ## Playground
 
-A playground is available [here](https://v4nn4.github.io/glyphs-generator/) for you to try! It is based on a blazing fast [Rust implementation](https://github.com/v4nn4/glyphs-generator-rs) that runs in the browser using WebAssembly and wasm-bindgen.
+A playground is available [here](https://romainflorentz.com/glyphs-generator) for you to try! It is based on a blazing fast [Rust implementation](https://github.com/v4nn4/glyphs-generator-rs) that runs in the browser using WebAssembly and wasm-bindgen.
